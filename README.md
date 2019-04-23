@@ -2,8 +2,6 @@
 
 > 扩展ElementUI表格组件，支持树状结构
 
-![demo](https://github.com/msidolphin/element-ui-tree-table/blob/master/screenshot/demo.gif)
-
 ## 支持特性
 
 * 数据源变动维持展开状态
