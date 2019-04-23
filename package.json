@@ -16,7 +16,6 @@
     "build": "node build/build.js"
   },
   "dependencies": {
-    "area-data": "^5.0.6",
     "element-ui": "^2.7.2",
     "vue": "^2.5.2"
   },
