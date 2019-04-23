@@ -5,6 +5,14 @@
   "author": "msidolphin <OoMass-EffectoO@hotmail.com>",
   "private": false,
   "main": "dist/index.js",
+  "bugs": {
+    "url": "https://github.com/msidolphin/element-ui-tree-table/issues"
+  },
+  "homepage": "https://github.com/msidolphin/element-ui-tree-table",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:msidolphin/element-ui-tree-table.git"
+  },
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
     "start": "npm run dev",
