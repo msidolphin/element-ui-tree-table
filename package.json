@@ -1,6 +1,6 @@
 {
   "name": "element-ui-tree-table",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A tree table component bases on Vue and ElementUI",
   "author": "msidolphin <OoMass-EffectoO@hotmail.com>",
   "private": false,

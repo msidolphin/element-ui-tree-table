@@ -86,6 +86,10 @@ export default {
       type: Array,
       required: true
     },
+    idKey: {
+      type: String,
+      default: 'rowKey'
+    },
     // element ui table配置 start
     height: {
       type: [String, Number]
@@ -235,15 +239,14 @@ export default {
     __columns2TableData (rows, data = [], level = 0, parent = 0) {
       for (let i = 0; i < rows.length; ++i) {
         let row = rows[i]
-        // let $row = JSON.parse(JSON.stringify(row))
-        let $row = row
+        let $row = JSON.parse(JSON.stringify(row))
         // 关键点
         this.$set($row, '$level', level)
         this.$set($row, '$parent', parent)
         delete $row.children
         // 设置是否折叠
         if ($row.$expanded === undefined) {
-          this.$set($row, '$expanded', this.expandedList.indexOf($row.rowKey) !== -1)
+          this.$set($row, '$expanded', this.expandedList.indexOf($row[this.idKey]) !== -1)
         } else {
           this.__saveExpandedPoint($row)
         }
@@ -251,7 +254,7 @@ export default {
         this.$set($row, '$childs', row.children ? row.children.length : 0) // 孩子节点数目
         data.push($row)
         if (row.children && row.children.length) {
-          this.__columns2TableData(row.children, data, level + 1, row.rowKey)
+          this.__columns2TableData(row.children, data, level + 1, row[this.idKey])
         }
       }
     },
@@ -259,7 +262,7 @@ export default {
       if (!this.hasSelection) return
       this.$nextTick(() => {
         this.rows.forEach(row => {
-          let index = this.selectionList.findIndex(s => s.rowKey === row.rowKey)
+          let index = this.selectionList.findIndex(s => s[this.idKey] === row[this.idKey])
           this.toggleRowSelection(row, index !== -1)
         })
       })
@@ -270,7 +273,7 @@ export default {
     __getParents (row, parent = [], immediate = false) {
       if (!row) return
       if (immediate) parent.push(row)
-      let index = this.rows.findIndex(d => d.rowKey === row.$parent)
+      let index = this.rows.findIndex(d => d[this.idKey] === row.$parent)
       this.__getParents(this.rows[index], parent, true)
     },
     /**
@@ -297,6 +300,7 @@ export default {
      */
     __toggleRowExpanded (row, collapse = undefined) {
       this.$set(row, '$expanded', !row.$expanded)
+      this.$emit('trigger', row.$expanded)
       this.__saveExpandedPoint(row)
     },
     /**
@@ -304,9 +308,9 @@ export default {
      */
     __saveExpandedPoint (row) {
       if (row.$expanded) {
-        this.expandedList.push(row.rowKey)
+        this.expandedList.push(row[this.idKey])
       } else {
-        let index = this.expandedList.findIndex(item => item === row.rowKey)
+        let index = this.expandedList.findIndex(item => item === row[this.idKey])
         if (index !== -1) this.expandedList.splice(index, 1)
       }
     },
@@ -318,7 +322,7 @@ export default {
       let checked = selection.indexOf(row) !== -1
       // 在selection找出自己及所有的兄弟节点
       let brothers = selection.filter(s => s.$parent === row.$parent)
-      let index = this.rows.findIndex(r => r.rowKey === row.$parent)
+      let index = this.rows.findIndex(r => r[this.idKey] === row.$parent)
       let parent = this.rows[index]
       if (parent) {
         // 逐层处理祖先节点
@@ -328,7 +332,7 @@ export default {
           if (!row) return
           this.toggleRowSelection(row, checked)
           if (row.$parent === 0) return
-          let index = this.rows.findIndex(r => r.rowKey === row.$parent)
+          let index = this.rows.findIndex(r => r[this.idKey] === row.$parent)
           let p = this.rows[index]
           let b = selection.filter(s => s.$parent === row.$parent)
           // 逻辑同上
@@ -343,13 +347,13 @@ export default {
         const handleChildChecked = (row, checked) => {
           this.toggleRowSelection(row, checked)
           if (!row.$isLeaf) {
-            let childs = this.rows.filter(r => r.$parent === row.rowKey)
+            let childs = this.rows.filter(r => r.$parent === row[this.idKey])
             childs.forEach(child => {
               handleChildChecked(child, checked)
             })
           }
         }
-        let childs = this.rows.filter(r => r.$parent === row.rowKey)
+        let childs = this.rows.filter(r => r.$parent === row[this.idKey])
         childs.forEach(child => {
           handleChildChecked(child, checked)
         })
