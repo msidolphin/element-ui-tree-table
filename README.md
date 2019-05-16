@@ -16,7 +16,7 @@ npm install element-ui-tree-table -S
 ### 引入
 ```javascript
 import TreeTableComponent from 'element-ui-tree-table'
-import 'element-ui-tree-table/index.css'
+import 'element-ui-tree-table/dist/index.css'
 Vue.use(TreeTableComponent, {
     prefix: 'i' // 可选
 })
