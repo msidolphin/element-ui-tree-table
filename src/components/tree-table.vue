@@ -53,20 +53,38 @@
                 :type="column.type"
                 :align="column.align"
                 :width="column.width"
-                :prop="column.prop"></el-table-column>
+                :min-width="column['min-width']"
+                :prop="column.prop"
+                :render-header="column['render-header']"
+                :show-overflow-tooltip="column['show-overflow-tooltip'] ? column['show-overflow-tooltip'] : true"
+                :header-align="column['header-align']"
+                :class-name="column['class-name']"
+                :label-class-name="column['label-class-name']"
+                :resizable="column['resizeable']"
+                :selectable="column['selectable']"></el-table-column>
             <el-table-column v-else
                 :key="index"
-                :label="column.label">
+                :label="column.label"
+                :align="column.align"
+                :width="column.width"
+                :fixed="column.fixed"
+                :render-header="column['render-header']"
+                :class-name="column['class-name']"
+                :show-overflow-tooltip="column['show-overflow-tooltip'] ? column['show-overflow-tooltip'] : true"
+                :label-class-name="column['label-class-name']"
+                :header-align="column['header-align']"
+                :resizable="column['resizeable']"
+                :min-width="column['min-width']">
                 <template slot-scope="scope">
                     <template v-if="!scope.row.$isLeaf">
                         <div class="trigger"
-                            :class="{expanded: scope.row.$expanded}"
+                            :class="[{expanded: scope.row.$expanded}, triggerClass]"
                             :style="`margin-left: ${scope.row.$level * 20}px;margin-top:0;margin-bottom:0`"
                             @click.stop="__toggleRowExpanded(scope.row)" >
-                            <span class="trigger-btn el-icon-caret-right"></span>
+                            <span class="trigger-btn" :class="[icon]"></span>
                         </div><span class="trigger-text">{{scope.row[column.prop]}}</span>
                     </template>
-                    <p v-else :style="`margin-left: ${scope.row.$level * 20}px;margin-top:0;margin-bottom:0`">{{scope.row[column.prop]}}</p>
+                    <p v-else :style="`margin-left: ${scope.row.$level * 20 + 13}px;margin-top:0;margin-bottom:0`">{{scope.row[column.prop]}}</p>
                 </template>
             </el-table-column>
         </template>
@@ -89,6 +107,14 @@ export default {
     idKey: {
       type: String,
       default: 'rowKey'
+    },
+    icon: {
+      type: String,
+      default: 'el-icon-caret-right'
+    },
+    triggerClass: {
+      type: String,
+      default: ''
     },
     // element ui table配置 start
     height: {
@@ -197,7 +223,8 @@ export default {
       init: false,
       rows: [],
       expandedList: [], // 记录所有展开行
-      selectionList: [] // 记录选中的行
+      selectionList: [], // 记录选中的行
+      queue: []
     }
   },
   watch: {
@@ -291,6 +318,9 @@ export default {
     __computeRowStyle ({row, rowIndex}) {
       if (row.$parent === 0) return ''
       let isExpanded = this.__isExpanded(row)
+      this.$nextTick(() => {
+        if (this.$refs.table) this.$refs.table.doLayout()
+      })
       if (!isExpanded) {
         return 'hidden'
       } else return ''
@@ -314,9 +344,6 @@ export default {
         if (index !== -1) this.expandedList.splice(index, 1)
       }
     },
-    __handleParentNodeSelection () {
-
-    },
     // element ui 表格事件 start
     __onSelect (selection, row) {
       let checked = selection.indexOf(row) !== -1
@@ -327,6 +354,7 @@ export default {
       if (parent) {
         // 逐层处理祖先节点
         // 如果selection中兄弟节点数目等于父节点$childs数量，那么父节点设置为全选
+        // TODO 如果存在禁用呢？
         let parentChecked = brothers.length === parent.$childs
         const handleParentChecked = (row, checked) => {
           if (!row) return
@@ -338,7 +366,6 @@ export default {
           // 逻辑同上
           handleParentChecked(p, b.length === p.$childs)
         }
-
         handleParentChecked(parent, parentChecked)
       }
       // 如果row不是叶子节点，要处理全选情况
@@ -360,6 +387,20 @@ export default {
       }
       this.selectionList = selection
       this.$emit('select', selection, row)
+    },
+    expandAll () {
+      this.__toggle(this.rows, true)
+    },
+    collapseAll () {
+      this.__toggle(this.rows, false)
+    },
+    __toggle (rows, status = true) {
+      if (!rows) return
+      rows.forEach(row => {
+        if (!row.$isLeaf) {
+          this.$set(row, '$expanded', status)
+        }
+      })
     },
     onSelectAll (selection) {
       this.selectionList = selection
@@ -425,6 +466,11 @@ export default {
       this.$refs.table.toggleRowExpansion(row, expanded)
     },
     setCurrentRow (row) {
+      if (typeof row !== 'object') {
+        let index = this.rows.findIndex(r => r[this.idKey] === row)
+        if (index !== -1) row = this.rows[index]
+        else return
+      }
       this.$refs.table.setCurrentRow(row)
     },
     clearSort () {

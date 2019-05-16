@@ -2,10 +2,6 @@
 
 > 扩展ElementUI表格组件，支持树状结构
 
-## TODO
-
- - [ ] 展开图标自定义
-
 
 ## 安装
 
@@ -93,12 +89,37 @@ export default {
 
 | 属性 | 类型 | 说明 | 默认值 |
 | :------ | :------ | :------ | --- |
-| data | Array | 数据源, 要求指定一个rowKey属性，唯一标识该行 | - |
+| data | Array | 数据源, 要求默认指定一个rowKey属性，唯一标识该行 | - |
+| id-key | String | 数据源唯一索引 | rowKey |
 | columns | Array | 配置索引列，选择列和展开列 | - |
+| icon | String | 展开图标 | el-icon-caret-right | - |
+| trigger-class | String | 展开按钮类 | - |
 | 原表格配置项 | - | 参考element-ui文档 | - |
 
 ### columns配置项
-注意：第一个type不为index和selection的元素将被视为展开按钮放置列
+注意：
+* 第一个type不为index和selection的元素将被视为展开按钮放置列
+* 只能有一个展开列，多余的会忽略
+
+#### 展开列配置
+
+| 属性 | 类型 | 说明 | 可选值 |
+| :------ | :------ | :------ | --- |
+| label | String | 显示的标题| - |
+| prop | String | 对应列内容的字段名，也可以使用 property 属性 | - |
+| align | String | 对齐方式 | left/center/right|
+| width | String | 对应列的宽度 | - | | |
+| fixed | String, Boolean | 列是否固定在左侧或者右侧，true 表示固定在左侧 | |
+| render-header | Function(h, { column, $index }) | 列标题 Label 区域渲染使用的 Function | |
+| class-name | String | 列的 className| |
+| label-class-name | String | 当前列标题的自定义类名| |
+|show-overflow-tooltip | Boolean |  当内容过长被隐藏时显示 tooltip | |
+| min-width | String | 对应列的最小宽度，与 width 的区别是 width 是固定的，min-width 会把剩余宽度按比例分配给设置了 min-width 的列 | |
+| header-align | String | 表头对齐方式，若不设置该项，则使用表格的对齐方式 | left/center/right |
+| resizable	 | Boolean | 对应列是否可以通过拖动改变宽度（需要设置 border 属性为真） | |
+
+
+#### 普通列配置
 
 | 属性 | 类型 | 说明 | 可选值 |
 | :------ | :------ | :------ | --- |
@@ -106,7 +127,17 @@ export default {
 | label | String | 显示的标题| - |
 | prop | String | 对应列内容的字段名，也可以使用 property 属性 | - |
 | align | String | 对齐方式 | left/center/right|
-| width | String | 对应列的宽度 | - |
+| width | String | 对应列的宽度 | - | | |
+| fixed | String, Boolean | 列是否固定在左侧或者右侧，true 表示固定在左侧 | |
+| render-header | Function(h, { column, $index }) | 列标题 Label 区域渲染使用的 Function | |
+| class-name | String | 列的 className| |
+| label-class-name | String | 当前列标题的自定义类名| |
+| selectable | Function(row, index) |   仅对 type=selection 的列有效，类型为 Function，Function 的返回值用来决定这一行的 CheckBox 是否可以勾选 | |
+|show-overflow-tooltip | Boolean |  当内容过长被隐藏时显示 tooltip | |
+| min-width | String | 对应列的最小宽度，与 width 的区别是 width 是固定的，min-width 会把剩余宽度按比例分配给设置了 min-width 的列 | |
+| header-align | String | 表头对齐方式，若不设置该项，则使用表格的对齐方式 | left/center/right |
+| resizable	 | Boolean | 对应列是否可以通过拖动改变宽度（需要设置 border 属性为真） | |
+
 
 ## 事件
 

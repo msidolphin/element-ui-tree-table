@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <tree-table :columns="columns" @select="onSelect" :data="data" border>
+    <i-tree-table id-key="rowKey" :columns="columns" @select="onSelect" :data="data" border>
       <el-table-column label="负责人" prop="leader"/>
       <el-table-column label="创建时间" prop="createTime"/>
       <el-table-column label="经验要求" prop="expr">
@@ -10,7 +10,7 @@
         </template>
       </el-table-column>
       <el-table-column label="发布天数" prop="date"/>
-    </tree-table>
+    </i-tree-table>
     <br/>
     <el-button type="primary" size="small" @click="add">增加一行</el-button>
   </div>
