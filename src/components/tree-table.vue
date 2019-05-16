@@ -116,6 +116,10 @@ export default {
       type: String,
       default: ''
     },
+    reserveExpaned: { // 是否保留折叠状态
+      type: Boolean,
+      default: false
+    },
     // element ui table配置 start
     height: {
       type: [String, Number]
@@ -270,13 +274,12 @@ export default {
         // 关键点
         this.$set($row, '$level', level)
         this.$set($row, '$parent', parent)
-        delete $row.children
+        delete $row.children // 解决element-ui自身报错的问题
         // 设置是否折叠
         if ($row.$expanded === undefined) {
           this.$set($row, '$expanded', this.expandedList.indexOf($row[this.idKey]) !== -1)
-        } else {
-          this.__saveExpandedPoint($row)
         }
+        if (this.reserveExpaned) this.__saveExpandedPoint($row)
         this.$set($row, '$isLeaf', !row.children || !row.children.length)
         this.$set($row, '$childs', row.children ? row.children.length : 0) // 孩子节点数目
         data.push($row)
@@ -318,8 +321,9 @@ export default {
     __computeRowStyle ({row, rowIndex}) {
       if (row.$parent === 0) return ''
       let isExpanded = this.__isExpanded(row)
+      // 这里可能存在性能问题
       this.$nextTick(() => {
-        if (this.$refs.table) this.$refs.table.doLayout()
+        this.doLayout()
       })
       if (!isExpanded) {
         return 'hidden'
@@ -330,8 +334,19 @@ export default {
      */
     __toggleRowExpanded (row, collapse = undefined) {
       this.$set(row, '$expanded', !row.$expanded)
-      this.$emit('trigger', row.$expanded)
-      this.__saveExpandedPoint(row)
+      this.$emit('trigger', this.__getRowByRowKey(row[this.idKey], this.data), row.$expanded)
+      if (this.reserveExpaned) this.__saveExpandedPoint(row)
+    },
+    __getRowByRowKey (rowKey, data = []) {
+      if (!rowKey) return
+      for (let i = 0; i < data.length; ++i) {
+        let row = data[i]
+        if (row[this.idKey] === rowKey) return row
+        else if (row.children) {
+          let retRow = this.__getRowByRowKey(rowKey, row.children)
+          if (retRow) return retRow
+        }
+      }
     },
     /**
      * @description 保存或删除展开行
@@ -480,7 +495,9 @@ export default {
       this.$refs.table.clearFilter()
     },
     doLayout () {
-      this.$refs.table.doLayout()
+      if (this.$refs.table) {
+        this.$refs.table.doLayout()
+      }
     },
     sort (prop, order) {
       this.$refs.table.sort(prop, order)

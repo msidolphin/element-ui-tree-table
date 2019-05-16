@@ -1,6 +1,9 @@
 <template>
   <div id="app">
-    <i-tree-table id-key="rowKey" :columns="columns" @select="onSelect" :data="data" border>
+    <i-tree-table height="600px" id-key="rowKey" :columns="columns"
+      @select="onSelect"
+      @trigger="onTrigger"
+      :data="data" border>
       <el-table-column label="负责人" prop="leader"/>
       <el-table-column label="创建时间" prop="createTime"/>
       <el-table-column label="经验要求" prop="expr">
@@ -54,6 +57,9 @@ export default {
     },
     onSelect (selection) {
       console.log(selection)
+    },
+    onTrigger (row, expanded) {
+      row.$expanded = expanded
     }
   }
 }

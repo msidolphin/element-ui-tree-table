@@ -29,7 +29,10 @@ Vue.use(TreeTableComponent, {
 ```vue
 <template>
   <div id="app">
-    <i-tree-table :columns="columns" @select="onSelect" :data="data" border>
+    <i-tree-table height="600px" id-key="rowKey" :columns="columns"
+      @select="onSelect"
+      @trigger="onTrigger"
+      :data="data" border>
       <el-table-column label="负责人" prop="leader"/>
       <el-table-column label="创建时间" prop="createTime"/>
       <el-table-column label="经验要求" prop="expr">
@@ -47,8 +50,12 @@ Vue.use(TreeTableComponent, {
 
 <script>
 import data from './components/data'
+import TreeTable from './components/tree-table'
 export default {
   name: 'App',
+  components: {
+    TreeTable
+  },
   data () {
     return {
       data,
@@ -79,6 +86,14 @@ export default {
     },
     onSelect (selection) {
       console.log(selection)
+    },
+    onTrigger (row, expanded) {
+      /**
+       * 在这里可以保留折叠状态
+       * 也可以设置reserve-expaned属性为true保留状态 但是你不能够设置默认值，设置了默认值的行将不受控，因为* 组件肯定是选择用户传入$expaned属性为准
+       * 所以推荐的做法是监听trigger事件
+       */
+      row.$expanded = expanded
     }
   }
 }
@@ -94,6 +109,7 @@ export default {
 | columns | Array | 配置索引列，选择列和展开列 | - |
 | icon | String | 展开图标 | el-icon-caret-right | - |
 | trigger-class | String | 展开按钮类 | - |
+| reserve-expaned | Boolean| 是否保留展开状态，建议此属性为true时不要设置默认展开，保留展开状态可以通过监听trigger实现 | - |
 | 原表格配置项 | - | 参考element-ui文档 | - |
 
 ### columns配置项
@@ -140,5 +156,16 @@ export default {
 
 
 ## 事件
+
+| 事件名 | 作用 | 参数 |
+| :------ | :------ | :------ |
+| trigger | 展开状态改变时触发，一般用作保存状态 | (data数据源节点，展开状态) |
+
+## 方法
+
+| 方法名 | 作用 | 参数 |
+| :------ | :------ | :------ |
+| expandAll | 展开所有 | - |
+| collapseAll | 收起所有 | - |
 
 > 参考element-ui文档
